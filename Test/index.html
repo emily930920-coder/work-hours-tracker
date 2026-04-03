@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工时记录系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header .date {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .clock-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .current-time {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-clock-in {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-clock-out {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .today-record {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .today-record h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .record-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stats-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .history-section {
+            margin-bottom: 20px;
+        }
+
+        .history-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .history-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .sync-status {
+            text-align: center;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .sync-status.syncing {
+            background: #fff3e0;
+        }
+
+        .sync-status.error {
+            background: #ffebee;
+        }
+
+        .delete-btn {
+            background: #ff5252;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #ff1744;
+        }
+
+        .add-record-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .add-record-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .edit-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .edit-btn:hover {
+            background: #45a049;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .current-time {
+                font-size: 36px;
+            }
+
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-table {
+                font-size: 14px;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 工时记录系统</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div class="content">
+            <!-- 打卡区域 -->
+            <div class="clock-section">
+                <div class="current-time" id="currentTime"></div>
+                <div class="btn-group">
+                    <button class="btn btn-clock-in" id="clockInBtn" onclick="clockIn()">
+                        ⏰ 上班打卡
+                    </button>
+                    <button class="btn btn-clock-out" id="clockOutBtn" onclick="clockOut()" disabled>
+                        🏠 下班打卡
+                    </button>
+                </div>
+            </div>
+
+            <!-- 今日记录 -->
+            <div class="today-record">
+                <h3>📅 今日记录</h3>
+                <div class="record-item">
+                    <span class="record-label">上班时间：</span>
+                    <span class="record-value" id="todayClockIn">未打卡</span>
+                </div>
+                <div class="record-item">
+                    <span class="record-label">下班时间：</span>
+                    <span class="record-value" id="todayClockOut">未打卡</span>
+                </div>
+                <div class="record-item">
+                    <span class="record-label">工作时长：</span>
+                    <span class="record-value" id="todayHours">0.00 小时</span>
+                </div>
+            </div>
+
+            <!-- 本月统计 -->
+            <div class="stats-section">
+                <h3>📊 本月统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">工作天数</div>
+                        <div class="stat-value" id="monthDays">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">总工时</div>
+                        <div class="stat-value" id="monthHours">0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均工时</div>
+                        <div class="stat-value" id="avgHours">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">📖 本月记录</h3>
+                    <button class="add-record-btn" onclick="openAddRecordModal()">
+                        ➕ 手动添加
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>上班</th>
+                                <th>下班</th>
+                                <th>工时</th>
+                                <th style="width: 120px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">暂无记录</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="sync-status" id="syncStatus">
+                💾 数据已保存到本地浏览器
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px 20px; font-size: 14px;" onclick="exportData()">
+                    📥 导出数据
+                </button>
+                <button class="btn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 10px 20px; font-size: 14px; margin-left: 10px;" onclick="importData()">
+                    📤 导入数据
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 手动添加/编辑记录弹窗 -->
+    <div id="addRecordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">➕ 添加打卡记录</h3>
+                <button class="close-btn" onclick="closeAddRecordModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>日期 *</label>
+                <input type="date" id="recordDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label>上班时间 *</label>
+                <input type="time" id="recordClockIn" required>
+            </div>
+            
+            <div class="form-group">
+                <label>下班时间</label>
+                <input type="time" id="recordClockOut">
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeAddRecordModal()">
+                    取消
+                </button>
+                <button class="btn btn-submit" onclick="saveManualRecord()">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 纯前端版本 - 数据保存在浏览器本地存储
+        const USE_LOCAL_STORAGE = true;
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            document.getElementById('currentTime').textContent = timeString;
+            
+            const dateString = now.toLocaleDateString('zh-CN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+            });
+            document.getElementById('currentDate').textContent = dateString;
+        }
+
+        // 初始化
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime();
+
+        // 获取今天的日期字符串
+        function getTodayString() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        // 获取本月字符串
+        function getCurrentMonthString() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        // 获取所有记录
+        function getRecords() {
+            const records = localStorage.getItem('workHoursRecords');
+            return records ? JSON.parse(records) : {};
+        }
+
+        // 保存记录
+        function saveRecords(records) {
+            localStorage.setItem('workHoursRecords', JSON.stringify(records));
+            syncToServer(records);
+        }
+
+        // 上班打卡
+        function clockIn() {
+            const now = new Date();
+            const today = getTodayString();
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            const records = getRecords();
+            if (!records[today]) {
+                records[today] = {};
+            }
+
+            records[today].clockIn = timeString;
+            records[today].date = today;
+            saveRecords(records);
+
+            document.getElementById('clockInBtn').disabled = true;
+            document.getElementById('clockOutBtn').disabled = false;
+            
+            updateDisplay();
+            showNotification('上班打卡成功！');
+        }
+
+        // 下班打卡
+        function clockOut() {
+            const now = new Date();
+            const today = getTodayString();
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            const records = getRecords();
+            if (records[today] && records[today].clockIn) {
+                records[today].clockOut = timeString;
+                records[today].hours = calculateHours(records[today].clockIn, records[today].clockOut);
+                saveRecords(records);
+
+                document.getElementById('clockOutBtn').disabled = true;
+                
+                updateDisplay();
+                showNotification('下班打卡成功！');
+            }
+        }
+
+        // 计算工时
+        function calculateHours(clockIn, clockOut) {
+            const [inHour, inMinute] = clockIn.split(':').map(Number);
+            const [outHour, outMinute] = clockOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            const diffMinutes = outMinutes - inMinutes;
+            return (diffMinutes / 60).toFixed(2);
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const records = getRecords();
+            const today = getTodayString();
+            const currentMonth = getCurrentMonthString();
+
+            // 更新今日记录
+            const todayRecord = records[today] || {};
+            document.getElementById('todayClockIn').textContent = todayRecord.clockIn || '未打卡';
+            document.getElementById('todayClockOut').textContent = todayRecord.clockOut || '未打卡';
+            document.getElementById('todayHours').textContent = todayRecord.hours ? `${todayRecord.hours} 小时` : '0.00 小时';
+
+            // 更新按钮状态
+            if (todayRecord.clockIn && !todayRecord.clockOut) {
+                document.getElementById('clockInBtn').disabled = true;
+                document.getElementById('clockOutBtn').disabled = false;
+            } else if (todayRecord.clockOut) {
+                document.getElementById('clockInBtn').disabled = true;
+                document.getElementById('clockOutBtn').disabled = true;
+            } else {
+                document.getElementById('clockInBtn').disabled = false;
+                document.getElementById('clockOutBtn').disabled = true;
+            }
+
+            // 计算本月统计
+            const monthRecords = Object.values(records).filter(r => r.date && r.date.startsWith(currentMonth));
+            const workDays = monthRecords.filter(r => r.clockIn).length;
+            const totalHours = monthRecords.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
+            const avgHours = workDays > 0 ? (totalHours / workDays).toFixed(2) : '0.00';
+
+            document.getElementById('monthDays').textContent = workDays;
+            document.getElementById('monthHours').textContent = totalHours.toFixed(2);
+            document.getElementById('avgHours').textContent = avgHours;
+
+            // 更新历史记录表格
+            updateHistoryTable(monthRecords);
+        }
+
+        // 更新历史记录表格
+        function updateHistoryTable(monthRecords) {
+            const tbody = document.getElementById('historyTableBody');
+            
+            if (monthRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暂无记录</td></tr>';
+                return;
+            }
+
+            // 按日期排序（最新的在前）
+            monthRecords.sort((a, b) => b.date.localeCompare(a.date));
+
+            tbody.innerHTML = monthRecords.map(record => `
+                <tr>
+                    <td>${record.date}</td>
+                    <td>${record.clockIn || '-'}</td>
+                    <td>${record.clockOut || '-'}</td>
+                    <td>${record.hours ? record.hours + ' 小时' : '-'}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editRecord('${record.date}')">编辑</button>
+                        <button class="delete-btn" onclick="deleteRecord('${record.date}')">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 删除记录
+        function deleteRecord(date) {
+            if (confirm(`确定要删除 ${date} 的记录吗？`)) {
+                const records = getRecords();
+                delete records[date];
+                saveRecords(records);
+                updateDisplay();
+                showNotification('记录已删除');
+            }
+        }
+
+        // 同步到本地存储
+        function syncToServer(records) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.className = 'sync-status';
+            const lastUpdate = new Date().toLocaleString('zh-CN');
+            syncStatus.textContent = `💾 数据已保存 - ${lastUpdate}`;
+        }
+
+        // 导出数据
+        function exportData() {
+            const records = getRecords();
+            const dataStr = JSON.stringify(records, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `工时记录_${getTodayString()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showNotification('数据导出成功！');
+        }
+
+        // 导入数据
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        // 处理导入
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedRecords = JSON.parse(e.target.result);
+                    const currentRecords = getRecords();
+                    
+                    // 合并记录（导入的数据优先）
+                    const mergedRecords = { ...currentRecords, ...importedRecords };
+                    
+                    localStorage.setItem('workHoursRecords', JSON.stringify(mergedRecords));
+                    updateDisplay();
+                    showNotification('数据导入成功！');
+                } catch (error) {
+                    alert('导入失败：文件格式不正确');
+                    console.error('导入错误:', error);
+                }
+            };
+            reader.readAsText(file);
+            
+            // 清除文件选择，允许重复导入相同文件
+            event.target.value = '';
+        }
+
+        // 从服务器加载数据（纯前端版本不需要）
+        async function loadFromServer() {
+            return;
+        }
+
+        // 获取用户ID（用于区分不同用户的数据）
+        function getUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('工时记录系统', {
+                    body: message,
+                    icon: '📋'
+                });
+            }
+        }
+
+        // 请求通知权限
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            updateDisplay();
+        });
+
+        // 定期更新保存状态显示（每分钟）
+        setInterval(() => {
+            const records = getRecords();
+            if (Object.keys(records).length > 0) {
+                syncToServer(records);
+            }
+        }, 60 * 1000);
+
+        // ========== 手动添加/编辑记录功能 ==========
+        
+        let isEditMode = false;
+        let editingDate = null;
+
+        // 打开添加记录弹窗
+        function openAddRecordModal() {
+            isEditMode = false;
+            editingDate = null;
+            
+            document.getElementById('modalTitle').textContent = '➕ 添加打卡记录';
+            document.getElementById('recordDate').value = getTodayString();
+            document.getElementById('recordClockIn').value = '';
+            document.getElementById('recordClockOut').value = '';
+            
+            // 移除日期只读限制
+            document.getElementById('recordDate').removeAttribute('readonly');
+            
+            document.getElementById('addRecordModal').classList.add('show');
+        }
+
+        // 编辑记录
+        function editRecord(date) {
+            isEditMode = true;
+            editingDate = date;
+            
+            const records = getRecords();
+            const record = records[date];
+            
+            if (!record) return;
+            
+            document.getElementById('modalTitle').textContent = '✏️ 编辑打卡记录';
+            document.getElementById('recordDate').value = date;
+            document.getElementById('recordClockIn').value = record.clockIn || '';
+            document.getElementById('recordClockOut').value = record.clockOut || '';
+            
+            // 编辑模式下日期不可修改
+            document.getElementById('recordDate').setAttribute('readonly', true);
+            
+            document.getElementById('addRecordModal').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeAddRecordModal() {
+            document.getElementById('addRecordModal').classList.remove('show');
+            isEditMode = false;
+            editingDate = null;
+        }
+
+        // 保存手动记录
+        function saveManualRecord() {
+            const date = document.getElementById('recordDate').value;
+            const clockIn = document.getElementById('recordClockIn').value;
+            const clockOut = document.getElementById('recordClockOut').value;
+
+            // 验证必填项
+            if (!date || !clockIn) {
+                alert('请填写日期和上班时间！');
+                return;
+            }
+
+            // 验证时间格式和逻辑
+            if (clockOut) {
+                const [inHour, inMinute] = clockIn.split(':').map(Number);
+                const [outHour, outMinute] = clockOut.split(':').map(Number);
+                
+                if (outHour * 60 + outMinute <= inHour * 60 + inMinute) {
+                    alert('下班时间必须晚于上班时间！');
+                    return;
+                }
+            }
+
+            // 获取记录
+            const records = getRecords();
+            
+            // 如果是编辑模式且日期改变了，删除旧记录
+            if (isEditMode && editingDate && editingDate !== date) {
+                delete records[editingDate];
+            }
+
+            // 保存新记录
+            if (!records[date]) {
+                records[date] = {};
+            }
+
+            records[date].date = date;
+            records[date].clockIn = clockIn;
+            records[date].clockOut = clockOut || null;
+            
+            // 如果有下班时间，计算工时
+            if (clockOut) {
+                records[date].hours = calculateHours(clockIn, clockOut);
+            } else {
+                records[date].hours = null;
+            }
+
+            // 保存到本地存储
+            saveRecords(records);
+            
+            // 更新显示
+            updateDisplay();
+            
+            // 关闭弹窗
+            closeAddRecordModal();
+            
+            // 显示提示
+            showNotification(isEditMode ? '记录已更新！' : '记录已添加！');
+        }
+
+        // 点击弹窗外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('addRecordModal');
+            if (event.target === modal) {
+                closeAddRecordModal();
+            }
+        }
+    </script>
+</body>
+</html>
