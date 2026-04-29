@@ -1,7 +1,6 @@
 const express = require('express');
 
-// 根据环境选择数据库
-const dbModule = process.env.VERCEL ? '../database/postgres-db' : '../database/db';
+// 统一使用 PostgreSQL
 const {
   getTodayRecord,
   createRecord,
@@ -11,7 +10,7 @@ const {
   getUserRecordsByMonth,
   getRecordById,
   batchCreateRecords
-} = require(dbModule);
+} = require('../database/postgres-db');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();

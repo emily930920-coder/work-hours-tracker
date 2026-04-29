@@ -1,1 +1,11 @@
 node_modules
+.env
+.DS_Store
+dist
+build
+*.log
+.vercel
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+

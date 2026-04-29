@@ -6,9 +6,8 @@ const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/auth');
 const recordRoutes = require('./routes/records');
 
-// 根据环境选择数据库
-const dbModule = process.env.VERCEL ? './database/postgres-db' : './database/db';
-const { initDatabase } = require(dbModule);
+// 统一使用 PostgreSQL
+const { initDatabase } = require('./database/postgres-db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
