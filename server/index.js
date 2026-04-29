@@ -46,7 +46,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-  console.log(`Accessible from network on port ${PORT}`);
-});
+// 本地开发时启动服务器
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Accessible from network on port ${PORT}`);
+  });
+}
+
+// 导出 app 供 Vercel serverless 使用
+module.exports = app;
