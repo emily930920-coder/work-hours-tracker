@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { 
-  Clock, 
   LogOut, 
-  Calendar, 
   Download, 
   Upload,
   History,
-  TrendingUp,
   Edit2,
   Trash2,
   Save,
@@ -290,18 +287,6 @@ export default function Dashboard() {
     }
   };
 
-  const calculateDuration = (clockIn: string, clockOut: string | null) => {
-    if (!clockOut) {
-      const diff = Date.now() - new Date(clockIn).getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      return `${hours}小时 ${minutes}分钟`;
-    }
-    const diff = new Date(clockOut).getTime() - new Date(clockIn).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}小时 ${minutes}分钟`;
-  };
 
   if (!user) return null;
 
