@@ -1,7 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getUser, createUser, getUserById } = require('../database/db');
+
+// 根据环境选择数据库
+const dbModule = process.env.VERCEL ? '../database/postgres-db' : '../database/db';
+const { getUser, createUser, getUserById } = require(dbModule);
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
