@@ -12,13 +12,18 @@ const { initDatabase } = require('./database/postgres-db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 信任代理 - Render 使用反向代理
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(limiter);
 

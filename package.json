@@ -24,7 +24,6 @@
     "dotenv": "^16.3.1",
     "helmet": "^7.1.0",
     "express-rate-limit": "^7.1.5",
-    "@vercel/postgres": "^0.5.1",
     "pg": "^8.11.3"
   },
   "devDependencies": {
