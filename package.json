@@ -11,7 +11,7 @@
     "start": "node server/index.js",
     "install-all": "npm install && cd client && npm install",
     "install-local": "npm install better-sqlite3@^9.2.2",
-    "render-build": "npm install && cd client && npm install && npm run build"
+    "render-build": "npm install && cd client && npm install --production=false && npm run build"
   },
   "keywords": ["work-hours", "time-tracking", "clock-in"],
   "author": "",
