@@ -142,6 +142,46 @@ async function batchCreateRecords(userId, records) {
   }
 }
 
+// 新增：获取所有用户列表
+async function getAllUsers() {
+  const result = await pool.query(
+    'SELECT id, username, fullname, created_at FROM users ORDER BY created_at DESC'
+  );
+  return result.rows;
+}
+
+// 新增：更新用户密码
+async function updateUserPassword(userId, newHashedPassword) {
+  const result = await pool.query(
+    'UPDATE users SET password = $1 WHERE id = $2 RETURNING id',
+    [newHashedPassword, userId]
+  );
+  return result.rowCount > 0;
+}
+
+// 新增：删除用户（会级联删除其所有记录）
+async function deleteUser(userId) {
+  const result = await pool.query(
+    'DELETE FROM users WHERE id = $1',
+    [userId]
+  );
+  return result.rowCount > 0;
+}
+
+// 新增：获取用户统计信息
+async function getUserStats(userId) {
+  const result = await pool.query(`
+    SELECT 
+      COUNT(*) as total_records,
+      SUM(work_hours) as total_hours,
+      MIN(clock_in) as first_record,
+      MAX(clock_in) as last_record
+    FROM records 
+    WHERE user_id = $1
+  `, [userId]);
+  return result.rows[0];
+}
+
 // 优雅关闭
 process.on('SIGTERM', () => {
   pool.end(() => {
@@ -162,5 +202,9 @@ module.exports = {
   getUserRecordsByMonth,
   getRecordById,
   batchCreateRecords,
+  getAllUsers,
+  updateUserPassword,
+  deleteUser,
+  getUserStats,
   pool
 };
