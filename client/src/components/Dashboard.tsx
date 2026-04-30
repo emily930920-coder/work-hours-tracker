@@ -10,7 +10,8 @@ import {
   Trash2,
   Save,
   X,
-  Plus
+  Plus,
+  Users
 } from 'lucide-react';
 import { recordService } from '../services/api';
 import { localStorageService } from '../services/storage';
@@ -324,8 +325,22 @@ export default function Dashboard() {
               {isOnline ? '在线' : '离线'}
             </span>
             <button
+              onClick={() => navigate('/users')}
+              className="btn"
+              title="用户管理"
+              style={{ 
+                padding: '0.375rem 0.75rem',
+                background: 'rgba(255,255,255,0.2)', 
+                color: 'white',
+                fontSize: '0.875rem'
+              }}
+            >
+              <Users size={16} />
+            </button>
+            <button
               onClick={handleLogout}
               className="btn"
+              title="退出登录"
               style={{ 
                 padding: '0.375rem 0.75rem',
                 background: 'rgba(255,255,255,0.2)', 
